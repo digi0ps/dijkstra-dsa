@@ -6,7 +6,6 @@
  */
 
 var ShortestPathCalculator = function(nodes, paths) {
-
 	this.nodes = nodes; // nodes => [ { index: 0, value: 'a', r: 20 }, ... ]
 	this.paths = paths; // paths => [ { source: 0, target: 1, distance: 150 }, ... ]
 	this.distances = []; // [ [ x, 100, 150 ], [ 100, x, 10] ]
@@ -102,6 +101,13 @@ ShortestPathCalculator.prototype.makeSVG = function(elementId, width, height) {
 	this.graph.svg = target.append("svg:svg")
 		.attr("width", this.graph.width)
 		.attr("height", this.graph.height);
+  var svg = this.graph.svg;
+  var g = svg.append("g");
+  svg.call(d3.behavior.zoom().on("zoom", function(){
+    g.attr("transform", "translate(" + d3.event.translate + ")  scale(" + d3.event.scale + ")")
+  }));
+
+  this.graph.svg_g = g;
 
 }
 
@@ -118,7 +124,7 @@ ShortestPathCalculator.prototype.drawGraph = function(elementId, width, height) 
 		.nodes(this.nodes)
 		.links(this.paths)
 		.charge(-500)
-		.linkDistance(function(d){ return d.distance; })
+		.linkDistance(function(d){ return d.distance*5; })
 		.size([this.graph.width, this.graph.height]);
 
 	force.on("tick", function(e) {
@@ -131,7 +137,7 @@ ShortestPathCalculator.prototype.drawGraph = function(elementId, width, height) 
 	for (var i = j * j; i > 0; --i) force.tick();
 	force.stop();
 
-	this.graph.svg.selectAll("line")
+	this.graph.svg_g.selectAll("line")
 		.data(this.paths)
 		.enter()
 			.append("line")
@@ -150,7 +156,7 @@ ShortestPathCalculator.prototype.drawGraph = function(elementId, width, height) 
 				.attr("x2", function(d) { return d.target.x; })
 				.attr("y2", function(d) { return d.target.y; });
 
-	this.graph.svg.append("svg:g")
+	this.graph.svg_g.append("svg:g")
 		.selectAll("circle")
 			.data(this.nodes)
 			.enter()
@@ -158,9 +164,9 @@ ShortestPathCalculator.prototype.drawGraph = function(elementId, width, height) 
 					.attr("class", "node")
 					.attr("cx", function(d) { return d.x; })
 					.attr("cy", function(d) { return d.y; })
-					.attr("r",  function(d) { return 15; });
+					.attr("r",  function(d) { return 20; });
 
-	this.graph.svg.append("svg:g")
+	this.graph.svg_g.append("svg:g")
 		.selectAll("text")
 			.data(this.nodes)
 			.enter()
