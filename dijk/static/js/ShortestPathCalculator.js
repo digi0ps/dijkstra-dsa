@@ -103,11 +103,15 @@ ShortestPathCalculator.prototype.makeSVG = function(elementId, width, height) {
 		.attr("height", this.graph.height);
   var svg = this.graph.svg;
   var g = svg.append("g");
-  svg.call(d3.behavior.zoom().on("zoom", function(){
+  var zoom = d3.behavior.zoom()
+  .scaleExtent([0.5, 1.5])
+  .on("zoom", function(){
     g.attr("transform", "translate(" + d3.event.translate + ")  scale(" + d3.event.scale + ")");
     svg.selectAll('circle')
-      .attr("r", 15*d3.event.scale);
-  }));
+      .attr("r", 15+ (4 - 3/d3.event.scale));
+  })
+
+  svg.call(zoom);
 
   this.graph.svg_g = g;
 
@@ -125,7 +129,7 @@ ShortestPathCalculator.prototype.drawGraph = function(elementId, width, height) 
 	var force = d3.layout.force()
 		.nodes(this.nodes)
 		.links(this.paths)
-		.charge(-500)
+		.charge(-120)
 		.linkDistance(function(d){ return d.distance*5; })
 		.size([this.graph.width, this.graph.height]);
 
