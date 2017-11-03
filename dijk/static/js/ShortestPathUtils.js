@@ -14,7 +14,7 @@ var ShortestPathUtils = {
 
     nodeNames: "abcdefghijklmnopqrstuvwxyz",
 
-    makeTable: function(nodes) {
+    makedTable: function(nodes) {
         var integerRegex = /^\d+$/;
 
         if (!integerRegex.test(nodes)) return;
@@ -157,14 +157,16 @@ var ShortestPathUtils = {
         input = ShortestPathUtils.addElementProperty(input, "id", value);
         input = ShortestPathUtils.addElementProperty(input, "name", value);
         input = ShortestPathUtils.addElementProperty(input, "class", "select");
-
+        var con = document.getElementById("graph2");
         for (var i = 0; i < nodes; i++) {
             var option = document.createElement("option");
             option = ShortestPathUtils.addElementProperty(option, "value", i);
-            option.innerHTML = ShortestPathUtils.nodeNames[i];
+            option.innerHTML = nodes[i].value;
             input.appendChild(option);
+            console.log(option)
         }
-
+        con.appendChild(input);
+        console.log("Append");
         return input;
     },
 

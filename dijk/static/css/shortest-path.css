@@ -24,8 +24,8 @@ svg
 
 .label
 {
-	fill: #FFFFFF;
-	stroke: #FFFFFF;
+	fill: #ff1f1f;
+	stroke: #d6c2c2;
 }
 
 .node
@@ -43,4 +43,15 @@ table.input td
 {
 	width: 50px;
 	text-align: center;
+}
+
+.is-hidden {
+	display: none;
+}
+
+select {
+	margin-top: 5px;
+}
+.drop {
+	margin: 0px 10px;
 }

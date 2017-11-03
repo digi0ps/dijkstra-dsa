@@ -45,3 +45,7 @@ table.input td
 	width: 30px;
 	text-align: center;
 }
+
+.margin-none {
+	margin: 3px !important;
+}

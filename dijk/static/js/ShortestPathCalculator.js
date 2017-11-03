@@ -1,9 +1,12 @@
 /*
- *
- * Dijkstra Short Path Calculator and Graph Plotter
- * Uses D3 JS (V3)
- *
+Dijkstra Short Path Calculator 
+ DSA project
+ CSE2003
+ Sriram
+ Jagadeesh
+ Sai {Prakash}
  */
+
 
 var ShortestPathCalculator = function(nodes, paths) {
 	this.nodes = nodes; // nodes => [ { index: 0, value: 'a', r: 20 }, ... ]
@@ -12,7 +15,7 @@ var ShortestPathCalculator = function(nodes, paths) {
 	this.graph = {};
 
 	var maxNodes = 20;
-	var minNodes = 3;
+	var minNodes = 1;
 
 	if(!d3) throw new ShortestPathCalculator.SpcError(10, 'D3 library not found');
 
@@ -65,13 +68,18 @@ ShortestPathCalculator.prototype.makeDistanceArrayFromNodes = function() {
 }
 
 ShortestPathCalculator.prototype.populateDistances = function() {
-
+  console.log(this.paths);
 	for(var i=0; i<this.paths.length; i++) {
 
 		var s = parseInt(this.paths[i].source);
 		var t = parseInt(this.paths[i].target);
 		var d = parseInt(this.paths[i].distance);
-
+    if(isNaN(s) || isNaN(t)){
+      console.log(this.paths[i].source.index)
+      s = parseInt(this.paths[i].source.index);
+      t = parseInt(this.paths[i].target.index);
+    }
+    console.log(s, t);
 		this.distances[s][t] = d;
 		this.distances[t][s] = d;
 	}
@@ -108,7 +116,7 @@ ShortestPathCalculator.prototype.makeSVG = function(elementId, width, height) {
   .on("zoom", function(){
     g.attr("transform", "translate(" + d3.event.translate + ")  scale(" + d3.event.scale + ")");
     svg.selectAll('circle')
-      .attr("r", 15+ (4 - 3/d3.event.scale));
+      .attr("r", 5+ (4 - 3/d3.event.scale));
   })
 
   svg.call(zoom);
@@ -124,18 +132,18 @@ ShortestPathCalculator.prototype.drawGraph = function(elementId, width, height) 
 
 	var that = this;
 
-	this.nodes.forEach(function(d, i) { d.x = d.y = that.graph.width / that.nodes.length * i});
+	// this.nodes.forEach(function(d, i) { d.mx = d.my = that.graph.width / that.nodes.length * i});
 
 	var force = d3.layout.force()
 		.nodes(this.nodes)
 		.links(this.paths)
-		.charge(-120)
-		.linkDistance(function(d){ return d.distance*5; })
+		.charge(100)
+		.linkDistance(function(d){ return d.distance*10; })
 		.size([this.graph.width, this.graph.height]);
 
 	force.on("tick", function(e) {
 		that.graph.svg.selectAll("path")
-			.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+			.attr("transform", function(d) { return "translate(" + d.mx + "," + d.my + ")"; });
 	});
 
 	var j = this.nodes.length*20;
@@ -157,10 +165,10 @@ ShortestPathCalculator.prototype.drawGraph = function(elementId, width, height) 
 					}
 					return 'link';
 				})
-				.attr("x1", function(d) { return d.source.x; })
-				.attr("y1", function(d) { return d.source.y; })
-				.attr("x2", function(d) { return d.target.x; })
-				.attr("y2", function(d) { return d.target.y; });
+				.attr("x1", function(d) { return d.source.mx; })
+				.attr("y1", function(d) { return d.source.my; })
+				.attr("x2", function(d) { return d.target.mx; })
+				.attr("y2", function(d) { return d.target.my; });
 
 	this.graph.svg_g.append("svg:g")
 		.selectAll("circle")
@@ -168,9 +176,9 @@ ShortestPathCalculator.prototype.drawGraph = function(elementId, width, height) 
 			.enter()
 				.append("svg:circle")
 					.attr("class", "node")
-					.attr("cx", function(d) { return d.x; })
-					.attr("cy", function(d) { return d.y; })
-					.attr("r",  function(d) { return 15; });
+					.attr("cx", function(d) { return d.mx; })
+					.attr("cy", function(d) { return d.my; })
+					.attr("r",  function(d) { return 5; });
 
 	this.graph.svg_g.append("svg:g")
 		.selectAll("text")
@@ -178,9 +186,11 @@ ShortestPathCalculator.prototype.drawGraph = function(elementId, width, height) 
 			.enter()
 				.append("svg:text")
 					.attr("class", "label")
-					.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+					.attr("transform", function(d) { return "translate(" + d.mx + "," + (d.my - 10) + ")"; })
 					.attr("text-anchor", "middle")
-					.attr("y", ".3em")
+					.attr("y", ".1em")
+          .attr("font-size", "10")
+          .attr("fill", "red")
 					.text(function(d) { return d.value; });
 
 }
@@ -210,20 +220,12 @@ ShortestPathCalculator.prototype.formatResult = function() {
 		res += ' ' + sourceNode.value + ' -> ' + targetNode.value;
 	}
 	res += "</p>";
-	res += "<p><b>Distance:</b> " + this.result.distance + "</p></center>";
+	res += "<p><b>Time taken:</b> " + this.result.distance + "</p></center>";
 
 	return res;
 
 }
 
-/*
- *
- * Calculate shortest path between two nodes in a graph
- * 
- * @param {Integer} start     index of node to start from
- * @param {Integer} end       index of node to end at
- *
- */
 
 ShortestPathCalculator.prototype.dijkstra = function(start, end) {
 
@@ -283,16 +285,10 @@ ShortestPathCalculator.prototype.dijkstra = function(start, end) {
         var step    = { target: parseInt(end) };
 
         var v = parseInt(end);
-
-        //console.log('v');
-        //console.log(v);
         
         while (v>=0) {
 
             v = pred[v];
-
-            //console.log('v');
-            //console.log(v);
 
             if (v!==null && v>=0) {
                 step.source = v;
